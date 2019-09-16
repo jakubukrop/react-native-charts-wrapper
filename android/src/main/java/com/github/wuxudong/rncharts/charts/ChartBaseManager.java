@@ -32,7 +32,6 @@ import com.github.wuxudong.rncharts.utils.TypefaceUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager<T> {
 
@@ -439,12 +438,16 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                     since = (long) propMap.getDouble("since");
                 }
 
-                TimeUnit timeUnit = TimeUnit.MILLISECONDS;
-
+                String timeUnit = "MILLISECONDS";
                 if (BridgeUtils.validate(propMap, ReadableType.String, "timeUnit")) {
-                    timeUnit = TimeUnit.valueOf(propMap.getString("timeUnit").toUpperCase());
+                    timeUnit = propMap.getString("timeUnit").toUpperCase();
                 }
-                axis.setValueFormatter(new DateFormatter(valueFormatterPattern, since, timeUnit));
+
+                int timeUnitCount = 1;
+                if (BridgeUtils.validate(propMap, ReadableType.Number, "timeUnitCount")) {
+                    timeUnitCount = propMap.getInt("timeUnitCount");
+                }
+                axis.setValueFormatter(new DateFormatter(valueFormatterPattern, since, timeUnit, timeUnitCount));
             } else {
                 axis.setValueFormatter(new CustomFormatter(valueFormatter));
             }

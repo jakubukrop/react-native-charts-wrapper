@@ -20,7 +20,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 /**
  * https://github.com/PhilJay/MPAndroidChart/wiki/The-DataSet-class
@@ -74,12 +73,17 @@ public class ChartDataSetConfigUtils {
                     since = (long) config.getDouble("since");
                 }
 
-                TimeUnit timeUnit = TimeUnit.MILLISECONDS;
-
+                String timeUnit = "MILLISECONDS";
                 if (BridgeUtils.validate(config, ReadableType.String, "timeUnit")) {
-                    timeUnit = TimeUnit.valueOf(config.getString("timeUnit").toUpperCase());
+                    timeUnit = config.getString("timeUnit").toUpperCase();
                 }
-                dataSet.setValueFormatter(new DateFormatter(valueFormatterPattern, since, timeUnit));
+
+                int timeUnitCount = 1;
+                if (BridgeUtils.validate(config, ReadableType.Number, "timeUnitCount")) {
+                    timeUnitCount = config.getInt("timeUnitCount");
+                }
+
+                dataSet.setValueFormatter(new DateFormatter(valueFormatterPattern, since, timeUnit, timeUnitCount));
             } else {
                 dataSet.setValueFormatter(new CustomFormatter(valueFormatter));
             }

@@ -55,7 +55,8 @@ class ChartDataSetConfigUtils: NSObject {
                 let valueFormatterPattern = config["valueFormatterPattern"].stringValue;
                 let since = config["since"].double != nil ? config["since"].doubleValue : 0
                 let timeUnit = config["timeUnit"].string != nil ? config["timeUnit"].stringValue : "MILLISECONDS"
-                dataSet.valueFormatter = CustomChartDateFormatter(pattern: valueFormatterPattern, since: since, timeUnit: timeUnit);
+                let timeUnitCount = config["timeUnitCount"].int != nil ? config["timeUnitCount"].intValue : 1
+                dataSet.valueFormatter = CustomChartDateFormatter(pattern: valueFormatterPattern, since: since, timeUnit: timeUnit, timeUnitCount: timeUnitCount);
             } else {
                 let customFormatter = NumberFormatter()
                 customFormatter.positiveFormat = valueFormatter.stringValue
