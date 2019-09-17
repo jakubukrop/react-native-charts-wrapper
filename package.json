@@ -1,5 +1,6 @@
 {
   "name": "react-native-charts-wrapper",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/wuxudong/react-native-charts-wrapper.git"
