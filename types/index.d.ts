@@ -1,9 +1,33 @@
 import * as React from 'react'
 import {ViewProps} from 'react-native'
 
+export type CombinableChartType = 'BAR' | 'BUBBLE' | 'LINE' | 'CANDLE' | 'SCATTER'
+
 export type AxisDependency = 'LEFT' | 'RIGHT'
 
 export type TimeUnit = 'MILLISECONDS' | 'SECONDS' | 'MINUTES' | 'HOURS' | 'DAYS' | 'WEEKS' | 'MONTHS'
+
+export type GradientOrientation =
+  // draw the gradient from the top to the bottom
+  'TOP_BOTTOM'
+  // draw the gradient from the top-right to the bottom-left
+  | 'TR_BL'
+  // draw the gradient from the right to the left
+  | 'RIGHT_LEFT'
+  // draw the gradient from the bottom-right to the top-left
+  | 'BR_TL'
+  // draw the gradient from the bottom to the top
+  | 'BOTTOM_TOP'
+  // draw the gradient from the bottom-left to the top-right
+  | 'BL_TR'
+  // draw the gradient from the left to the right
+  | 'LEFT_RIGHT'
+  // draw the gradient from the top-left to the bottom-right
+  | 'TL_BR'
+
+export type LineMode = 'LINEAR' | 'STEPPED' | 'CUBIC_BEZIER' | 'HORIZONTAL_BEZIER'
+
+export type PaintStyle = 'FILL' | 'STROKE' | 'FILL_AND_STROKE'
 
 export type Highlights = Array<{
   x: number,
@@ -58,23 +82,7 @@ declare namespace ChartDataSetConfig {
       positions?: Array<number>,
       angle?: number,
       // Android
-      orientation?:
-      // draw the gradient from the top to the bottom
-      'TOP_BOTTOM'
-      // draw the gradient from the top-right to the bottom-left
-      | 'TR_BL'
-      // draw the gradient from the right to the left
-      | 'RIGHT_LEFT'
-      // draw the gradient from the bottom-right to the top-left
-      | 'BR_TL'
-      // draw the gradient from the bottom to the top
-      | 'BOTTOM_TOP'
-      // draw the gradient from the bottom-left to the top-right
-      | 'BL_TR'
-      // draw the gradient from the left to the right
-      | 'LEFT_RIGHT'
-      // draw the gradient from the top-left to the bottom-right
-      | 'TL_BR',
+      orientation?: GradientOrientation,
     },
     fillColor?: number,
     fillAlpha?: number,
@@ -82,6 +90,26 @@ declare namespace ChartDataSetConfig {
     lineWidth?: number, // between 0.2f and 10f
   }
 }
+
+type LineDataConfig = ChartDataSetConfig.Common
+  & ChartDataSetConfig.BarLineScatterCandleBubble
+  & ChartDataSetConfig.LineScatterCandleRadar
+  & ChartDataSetConfig.LineRadar
+  & {
+    circleRadius?: number,
+    drawCircles?: boolean,
+    mode?: LineMode,
+    drawCubicIntensity?: number,
+    circleColor?: number,
+    circleColors?: Array<number>,
+    circleHoleColor?: number,
+    drawCircleHole?: boolean,
+    dashedLine?: {
+      lineLength: number,
+      spaceLength: number,
+      phase?: number,
+    }
+  }
 
 type LineData = {
   dataSets: Array<{
@@ -93,25 +121,7 @@ type LineData = {
       } | number
     >,
     label: string,
-    config?: ChartDataSetConfig.Common
-    | ChartDataSetConfig.BarLineScatterCandleBubble
-    | ChartDataSetConfig.LineScatterCandleRadar
-    | ChartDataSetConfig.LineRadar
-    | {
-      circleRadius?: number,
-      drawCircles?: boolean,
-      mode?: 'LINEAR' | 'STEPPED' | 'CUBIC_BEZIER' | 'HORIZONTAL_BEZIER',
-      drawCubicIntensity?: number,
-      circleColor?: number,
-      circleColors?: Array<number>,
-      circleHoleColor?: number,
-      drawCircleHole?: boolean,
-      dashedLine?: {
-        lineLength: number,
-        spaceLength: number,
-        phase?: number,
-      }
-    }
+    config?: LineDataConfig,
   }>
 }
 
@@ -126,8 +136,8 @@ type BarData = {
     >,
     label: string,
     config: ChartDataSetConfig.Common
-    | ChartDataSetConfig.BarLineScatterCandleBubble
-    | {
+    & ChartDataSetConfig.BarLineScatterCandleBubble
+    & {
       barShadowColor?: number,
       highlightAlpha?: number,  // using android format (0-255), not ios format(0-1), the conversion is x/255
       stackLabels?: Array<string>,
@@ -179,9 +189,9 @@ type CandleData = {
       shadowColorSameAsCandle?: boolean,
       neutralColor?: number,
       decreasingColor?: number,
-      decreasingPaintStyle?: 'FILL' | 'STROKE' | 'FILL_AND_STROKE',
+      decreasingPaintStyle?: PaintStyle,
       increasingColor?: number,
-      increasingPaintStyle?: 'FILL' | 'STROKE' | 'FILL_AND_STROKE',
+      increasingPaintStyle?: PaintStyle,
     }
   }>,
 }
@@ -196,7 +206,7 @@ type PieData = {
     >,
     label: string,
     config?: ChartDataSetConfig.Common
-    | {
+    & {
       sliceSpace?: number,
       selectionShift?: number,
       xValuePosition?: 'INSIDE_SLICE' | 'OUTSIDE_SLICE',
@@ -216,8 +226,8 @@ type RadarData = {
     values: Array<{value: number} | number>,
     label: string,
     config?: ChartDataSetConfig.Common
-    | ChartDataSetConfig.LineScatterCandleRadar
-    | ChartDataSetConfig.LineRadar,
+    & ChartDataSetConfig.LineScatterCandleRadar
+    & ChartDataSetConfig.LineRadar,
   }>,
   labels: Array<string>,
 }
@@ -233,9 +243,9 @@ type ScatterData = {
     >,
     label: string,
     config?: ChartDataSetConfig.Common
-    | ChartDataSetConfig.BarLineScatterCandleBubble
-    | ChartDataSetConfig.LineScatterCandleRadar
-    | {
+    & ChartDataSetConfig.BarLineScatterCandleBubble
+    & ChartDataSetConfig.LineScatterCandleRadar
+    & {
       scatterShapeSize: number,
       scatterShape: 'SQUARE' | 'CIRCLE' | 'TRIANGLE' | 'CROSS' | 'X',
       scatterShapeHoleColor: number,
@@ -565,7 +575,7 @@ interface RadarChartProps extends PieRadarChartBase {
 export class RadarChart extends ChartComponent<RadarChartProps> {}
 
 interface CombinedChartProps extends BarLineChartBaseProps {
-  drawOrder?: Array<'BAR' | 'BUBBLE' | 'LINE' | 'CANDLE' | 'SCATTER'>,
+  drawOrder?: Array<CombinableChartType>,
   drawValueAboveBar?: boolean,
   highlightFullBarEnabled?: boolean,
   drawBarShadow?: boolean,
